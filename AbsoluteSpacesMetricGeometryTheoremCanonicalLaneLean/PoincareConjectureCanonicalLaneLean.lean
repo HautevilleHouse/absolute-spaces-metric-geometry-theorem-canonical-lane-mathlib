@@ -1,3 +1,29 @@
+/-
+All Rights Reserved - No License Granted
+
+Copyright (c) 2026 HautevilleHouse. All rights reserved.
+
+This repository is published for academic review, citation, priority, public
+notice, and research-reference purposes only.
+
+No license is granted to use, copy, reproduce, redistribute, modify, merge,
+publish, distribute, sublicense, sell, fork, mirror, scrape, use for training or
+fine-tuning, include in a dataset or benchmark, use to create, evaluate, or
+benchmark a derivative system, incorporate into another system, or create
+derivative works from this repository or any substantial portion of it without
+prior written permission from the rights holder.
+
+Viewing this repository on GitHub for academic review and citation is permitted
+with all rights reserved by the rights holder.
+
+Any discussion, review, comparison, implementation, derivative research use, or
+public reference to this repository must cite the repository and preserve this
+notice.
+
+Unauthorized reproduction or redistribution of this repository, including public
+GitHub forks containing the repository contents, constitutes copyright
+infringement and may be subject to DMCA.
+-/
 -- This module is the root of the AbsoluteSpacesMetricGeometryTheoremCanonicalLaneLean Lean proof package.
 -- It encodes the admissible-class bridge for the key theorems and structures in absolute spaces metric geometry.
 
@@ -28,21 +54,23 @@ class AbsoluteSpace (α : Type u) extends MetricSpace α where
 theorem midpoint_exists (α : Type u) [AbsoluteSpace α] (x y : α) :
     ∃ m : α, dist x m = dist m y ∧ dist x m = dist x y / 2 := by
   rcases AbsoluteSpace.geodesic x y with ⟨γ, hγ0, hγ1, hγiso⟩
-  let m : α := γ (1 / 2 : ℝ)
-  refine ⟨m, ?_⟩
-  have h0 : (0 : ℝ) ∈ Set.Icc 0 1 := by simp
-  have hhalf : (1 / 2 : ℝ) ∈ Set.Icc 0 1 := by simp [Set.mem_Icc]
-  have h1 : (1 : ℝ) ∈ Set.Icc 0 1 := by simp
+  refine ⟨γ (1 / 2 : ℝ), ?_⟩
+  have h0 : (0 : ℝ) ∈ Set.Icc 0 1 := by norm_num [Set.mem_Icc]
+  have hhalf : (1 / 2 : ℝ) ∈ Set.Icc 0 1 := by norm_num [Set.mem_Icc]
+  have h1 : (1 : ℝ) ∈ Set.Icc 0 1 := by norm_num [Set.mem_Icc]
   have hdist0half : dist (γ 0) (γ (1 / 2)) = dist (0 : ℝ) (1 / 2) := hγiso h0 hhalf
   have hdisthalf1 : dist (γ (1 / 2)) (γ 1) = dist (1 / 2 : ℝ) (1 : ℝ) := hγiso hhalf h1
   have hdist01 : dist (γ 0) (γ 1) = dist (0 : ℝ) (1 : ℝ) := hγiso h0 h1
-  rw [hγ0, hγ1] at hdist0half hdisthalf1 hdist01
+  have hx_m : dist x (γ (1 / 2)) = dist (0 : ℝ) (1 / 2) := by
+    simpa [hγ0] using hdist0half
+  have hm_y : dist (γ (1 / 2)) y = dist (1 / 2 : ℝ) (1 : ℝ) := by
+    simpa [hγ1] using hdisthalf1
+  have hx_y : dist x y = dist (0 : ℝ) (1 : ℝ) := by
+    simpa [hγ0, hγ1] using hdist01
   constructor
-  · -- dist x m = dist m y
-    rw [← hdist0half, ← hdisthalf1]
-    simp
-  · -- dist x m = dist x y / 2
-    rw [← hdist0half, ← hdist01]
+  · rw [hx_m, hm_y]
+    norm_num
+  · rw [hx_m, hx_y]
     norm_num
 
 /-- Noncomputably choose the midpoint. -/
